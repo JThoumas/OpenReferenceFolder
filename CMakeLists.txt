@@ -27,6 +27,7 @@ target_include_directories(glad PUBLIC extern/glad/include)
 add_executable(OpenReferenceFolder src/main.cpp)
 
 target_link_libraries(OpenReferenceFolder PRIVATE glad glfw)
+target_include_directories(OpenReferenceFolder PRIVATE src)
 
 # Platform-specific system libraries
 if (WIN32)

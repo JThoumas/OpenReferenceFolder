@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <core/log.h>
 
 // Callback function to adjust the viewport when the window is resized
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -9,14 +10,14 @@ static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
 // Callback function to print GLFW errors to the console
 static void glfwErrorCallback(int error, const char* description) {
-    std::cerr << "[GLFW Error " << error << "] " << description << std::endl;
+    LOG_ERROR("[GLFW Error " << error << "] " << description);
 }
 
 int main() {
     glfwSetErrorCallback(glfwErrorCallback);
 
     if (!glfwInit()) {
-        std::cerr << "Fatal: glfwInit() failed" << std::endl;
+        LOG_ERROR("Fatal: glfwInit() failed");
         return -1;
     }
 
@@ -38,7 +39,7 @@ int main() {
 
     // Check if window creation succeeded
     if (!window) {
-        std::cerr << "Fatal: glfwCreateWindow() failed" << std::endl;
+        LOG_ERROR("Fatal: glfwCreateWindow() failed");
         glfwTerminate();
         return -1;
     }
@@ -48,11 +49,24 @@ int main() {
 
     // Load all OpenGL 3.3 function pointers using GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Fatal: gladLoadGLLoader() failed" << std::endl;
+        LOG_ERROR("Fatal: gladLoadGLLoader() failed");
         glfwDestroyWindow(window);
         glfwTerminate();
         return -1;
     }
+
+    // Print OpenGL diagnostic info
+    LOG_INFO("OpenGL Vendor:   " << glGetString(GL_VENDOR));
+    LOG_INFO("OpenGL Renderer: " << glGetString(GL_RENDERER));
+    LOG_INFO("OpenGL Version:  " << glGetString(GL_VERSION));
+    LOG_INFO("GLSL Version:    " << glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    // Press Escape to close the window
+    glfwSetKeyCallback(window, [](GLFWwindow* win, int key, int, int action, int) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            glfwSetWindowShouldClose(win, GLFW_TRUE);
+        }
+    });
 
     // Set the viewport and register the framebuffer size callback
     int fbWidth, fbHeight;
