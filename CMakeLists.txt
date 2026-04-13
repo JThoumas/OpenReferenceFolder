@@ -23,11 +23,17 @@ FetchContent_MakeAvailable(glfw)
 add_library(glad STATIC extern/glad/src/glad.c)
 target_include_directories(glad PUBLIC extern/glad/include)
 
-# Main executable
-add_executable(OpenReferenceFolder src/main.cpp)
+# Framework library
+add_library(orf_framework STATIC
+    src/framework/core/framework.cpp
+)
+target_include_directories(orf_framework PUBLIC src)
+target_link_libraries(orf_framework PUBLIC glad glfw)
 
-target_link_libraries(OpenReferenceFolder PRIVATE glad glfw)
-target_include_directories(OpenReferenceFolder PRIVATE src)
+# Main executable
+add_executable(OpenReferenceFolder src/app/main.cpp)
+
+target_link_libraries(OpenReferenceFolder PRIVATE orf_framework)
 
 # Platform-specific system libraries
 if (WIN32)

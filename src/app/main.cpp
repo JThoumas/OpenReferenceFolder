@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <core/log.h>
+#include <framework/core/log.h>
 
 // Callback function to adjust the viewport when the window is resized
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
