@@ -14,10 +14,17 @@ FetchContent_Declare(
     GIT_TAG        3.3.9
 )
 
+FetchContent_Declare(
+    freetype
+    GIT_REPOSITORY https://github.com/freetype/freetype.git
+    GIT_TAG        VER-2-13-2
+)
+
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(glfw)
+
+FetchContent_MakeAvailable(glfw freetype)
 
 # Build GLAD as a small static library
 add_library(glad STATIC extern/glad/src/glad.c)
@@ -26,9 +33,11 @@ target_include_directories(glad PUBLIC extern/glad/include)
 # Framework library
 add_library(orf_framework STATIC
     src/framework/core/framework.cpp
+    src/framework/renderer/shader.cpp
+    src/framework/renderer/renderer2d.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
-target_link_libraries(orf_framework PUBLIC glad glfw)
+target_link_libraries(orf_framework PUBLIC glad glfw freetype)
 
 # Main executable
 add_executable(OpenReferenceFolder src/app/main.cpp)
