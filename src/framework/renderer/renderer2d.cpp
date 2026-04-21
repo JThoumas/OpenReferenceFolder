@@ -249,4 +249,29 @@ void Renderer2D::drawTexturedRect(const Rect& r, GLuint texID, const Color& tint
     ++m_quadCount;
 }
 
+void Renderer2D::drawText(const std::string& text, float x, float y,
+                           const Font& font, const Color& color) {
+    float cursor = x;
+    for (char c : text) {
+        if (c < 0 || c >= 128) continue;
+        const GlyphMetrics& g = font.glyph(c);
+        if (g.width == 0) { cursor += (float)g.advance; continue; }
+
+        float xPos = cursor + (float)g.bearingX;
+        float yPos = y - (float)g.bearingY;
+
+        Rect rect{ xPos, yPos, (float)g.width, (float)g.height };
+        if (m_quadCount >= MAX_QUADS) flush();
+        float slot = static_cast<float>(getTexSlot(font.atlasTextureID()));
+        uint32_t base = m_quadCount * 4;
+        m_vertexBuffer[base+0] = {rect.x,              rect.y,               g.u0, g.v0, color.r,color.g,color.b,color.a, slot};
+        m_vertexBuffer[base+1] = {rect.x + rect.width, rect.y,               g.u1, g.v0, color.r,color.g,color.b,color.a, slot};
+        m_vertexBuffer[base+2] = {rect.x + rect.width, rect.y + rect.height, g.u1, g.v1, color.r,color.g,color.b,color.a, slot};
+        m_vertexBuffer[base+3] = {rect.x,              rect.y + rect.height, g.u0, g.v1, color.r,color.g,color.b,color.a, slot};
+        ++m_quadCount;
+
+        cursor += (float)g.advance;
+    }
+}
+
 } // namespace orf

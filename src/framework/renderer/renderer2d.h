@@ -1,5 +1,6 @@
 #pragma once
 #include "shader.h"
+#include "font.h"
 #include <glad/glad.h>
 #include <cstdint>
 #include <array>
@@ -44,6 +45,7 @@ public:
     // Draw primitives
     void drawRect(const Rect& rect, const Color& color);
     void drawTexturedRect(const Rect& rect, GLuint textureID, const Color& tint = Color::white());
+    void drawText(const std::string& text, float x, float y, const Font& font, const Color& color);
 
 private:
     struct Vertex {
