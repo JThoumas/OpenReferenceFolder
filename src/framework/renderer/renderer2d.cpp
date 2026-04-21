@@ -42,7 +42,10 @@ void main() {
         fragColor = v_Color;
     } else {
         int idx = int(v_TexIndex);
-        fragColor = texture(u_Textures[idx], v_UV) * v_Color;
+        vec4 sampled = texture(u_Textures[idx], v_UV);
+        // For glyph atlas (single channel), use R as alpha.
+        // For regular textures, .r will be non-zero for opaque parts.
+        fragColor = vec4(v_Color.rgb, v_Color.a * sampled.r);
     }
 }
 )";
