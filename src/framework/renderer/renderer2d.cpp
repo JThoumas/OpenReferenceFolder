@@ -274,4 +274,20 @@ void Renderer2D::drawText(const std::string& text, float x, float y,
     }
 }
 
+void Renderer2D::pushClip(const Rect& r) {
+    flush();
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(
+        static_cast<GLint>(r.x),
+        static_cast<GLint>(m_vpHeight - r.y - r.height),
+        static_cast<GLsizei>(r.width),
+        static_cast<GLsizei>(r.height)
+    );
+}
+
+void Renderer2D::popClip() {
+    flush();
+    glDisable(GL_SCISSOR_TEST);
+}
+
 } // namespace orf

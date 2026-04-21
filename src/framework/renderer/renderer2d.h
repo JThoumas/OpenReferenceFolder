@@ -47,6 +47,9 @@ public:
     void drawTexturedRect(const Rect& rect, GLuint textureID, const Color& tint = Color::white());
     void drawText(const std::string& text, float x, float y, const Font& font, const Color& color);
 
+    void pushClip(const Rect& rect);
+    void popClip();
+
 private:
     struct Vertex {
         float x, y;       // position
