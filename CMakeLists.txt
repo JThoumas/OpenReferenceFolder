@@ -30,14 +30,19 @@ FetchContent_MakeAvailable(glfw freetype)
 add_library(glad STATIC extern/glad/src/glad.c)
 target_include_directories(glad PUBLIC extern/glad/include)
 
+# stb_image for image loading
+add_library(stb STATIC extern/stb/stb_image.cpp)
+target_include_directories(stb PUBLIC extern/stb)
+
 # Framework library
 add_library(orf_framework STATIC
     src/framework/core/framework.cpp
     src/framework/renderer/shader.cpp
     src/framework/renderer/renderer2d.cpp
+    src/framework/renderer/font.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
-target_link_libraries(orf_framework PUBLIC glad glfw freetype)
+target_link_libraries(orf_framework PUBLIC glad glfw freetype stb)
 
 # Main executable
 add_executable(OpenReferenceFolder src/app/main.cpp)
