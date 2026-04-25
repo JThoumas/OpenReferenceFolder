@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <iostream>
 #include "framework/core/log.h"
+#include "framework/widgets/panel.h"
+#include "framework/widgets/label.h"
 
 namespace orf {
 
@@ -80,6 +82,24 @@ bool Application::init(int width, int height, const char* title) {
 
     m_rootWidget = std::make_unique<orf::RootWidget>(m_font);
     m_rootWidget->resize(m_fbWidth, m_fbHeight);
+
+    // Build a small test scene: Root -> MainPanel -> Label + SidePanel -> SidebarLabel.
+    auto mainPanel = std::make_unique<Panel>(Color{0.18f, 0.18f, 0.18f, 1.0f});
+    mainPanel->setBounds({50, 50, 600, 400});
+
+    auto mainLabel = std::make_unique<Label>("Main Panel", Color::white());
+    mainLabel->setBounds({60, 60, 200, 30});
+    mainPanel->addChild(std::move(mainLabel));
+
+    auto sidePanel = std::make_unique<Panel>(Color{0.25f, 0.25f, 0.25f, 1.0f});
+    sidePanel->setBounds({400, 60, 180, 320});
+
+    auto sideLabel = std::make_unique<Label>("Sidebar", Color{0.8f, 0.8f, 0.8f, 1.0f});
+    sideLabel->setBounds({410, 70, 100, 30});
+    sidePanel->addChild(std::move(sideLabel));
+
+    mainPanel->addChild(std::move(sidePanel));
+    m_rootWidget->addChild(std::move(mainPanel));
 
     glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int w, int h) {
         auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
