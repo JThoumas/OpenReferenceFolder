@@ -4,6 +4,7 @@
 #include "framework/core/log.h"
 #include "framework/widgets/panel.h"
 #include "framework/widgets/label.h"
+#include "framework/widgets/button.h"
 
 namespace orf {
 
@@ -11,34 +12,24 @@ static void glfwErrorCallback(int error, const char* description) {
     LOG_ERROR("[GLFW Error " << error << "] " << description);
 }
 
-static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-    if (app) {
-        app->renderer().setViewportSize(width, height);
-        // We'll also call the member function for any additional logic
-    }
-    glViewport(0, 0, width, height);
-}
-
 bool Application::init(int width, int height, const char* title) {
-    glfwSetErrorCallback(glfwErrorCallback);
-
     if (!glfwInit()) {
-        LOG_ERROR("Fatal: glfwInit() failed");
+        LOG_ERROR("Failed to initialize GLFW");
         return false;
     }
+
+    glfwSetErrorCallback(glfwErrorCallback);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
     m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     if (!m_window) {
-        LOG_ERROR("Fatal: glfwCreateWindow() failed");
+        LOG_ERROR("Failed to create GLFW window");
         glfwTerminate();
         return false;
     }
@@ -47,58 +38,47 @@ bool Application::init(int width, int height, const char* title) {
     glfwSetWindowUserPointer(m_window, this);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        LOG_ERROR("Fatal: gladLoadGLLoader() failed");
-        glfwDestroyWindow(m_window);
-        glfwTerminate();
+        LOG_ERROR("Failed to initialize GLAD");
         return false;
     }
-
-    LOG_INFO("OpenGL Vendor:   " << glGetString(GL_VENDOR));
-    LOG_INFO("OpenGL Renderer: " << glGetString(GL_RENDERER));
-    LOG_INFO("OpenGL Version:  " << glGetString(GL_VERSION));
 
     glfwGetFramebufferSize(m_window, &m_fbWidth, &m_fbHeight);
+
     if (!m_renderer.init(m_fbWidth, m_fbHeight)) {
-        LOG_ERROR("Fatal: Renderer2D initialization failed");
-        shutdown();
+        LOG_ERROR("Failed to initialize Renderer2D");
         return false;
     }
 
-    // TODO: Implement proper cross-platform font discovery/management.
-    // For now, we use hardcoded paths for common system fonts.
-#ifdef __APPLE__
-    const char* defaultFontPath = "/System/Library/Fonts/Geneva.ttf";
-#elif defined(_WIN32)
-    const char* defaultFontPath = "C:\\Windows\\Fonts\\arial.ttf";
-#else
-    const char* defaultFontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-#endif
-
-    if (!m_font.load(defaultFontPath, 24)) {
-        LOG_ERROR("Fatal: Failed to load default font at " << defaultFontPath);
-        shutdown();
-        return false;
+    if (!m_font.load("assets/fonts/Inter-Regular.ttf", 16)) {
+        LOG_WARN("Failed to load default font, text rendering may fail");
     }
 
-    m_rootWidget = std::make_unique<orf::RootWidget>(m_font);
+    m_rootWidget = std::make_unique<RootWidget>(m_font);
     m_rootWidget->resize(m_fbWidth, m_fbHeight);
 
-    // Build a small test scene: Root -> MainPanel -> Label + SidePanel -> SidebarLabel.
-    auto mainPanel = std::make_unique<Panel>(Color{0.18f, 0.18f, 0.18f, 1.0f});
+    // Test Scene
+    auto mainPanel = std::make_unique<Panel>(Color{0.18f, 0.18f, 0.2f, 1.0f});
     mainPanel->setBounds({50, 50, 600, 400});
 
-    auto mainLabel = std::make_unique<Label>("Main Panel", Color::white());
-    mainLabel->setBounds({60, 60, 200, 30});
-    mainPanel->addChild(std::move(mainLabel));
+    auto titleLabel = std::make_unique<Label>("OpenReferenceFolder — Widget System");
+    titleLabel->setBounds({60, 60, 580, 30});
+    mainPanel->addChild(std::move(titleLabel));
 
-    auto sidePanel = std::make_unique<Panel>(Color{0.25f, 0.25f, 0.25f, 1.0f});
+    auto sidePanel = std::make_unique<Panel>(Color{0.12f, 0.12f, 0.15f, 1.0f});
     sidePanel->setBounds({400, 60, 180, 320});
 
     auto sideLabel = std::make_unique<Label>("Sidebar", Color{0.8f, 0.8f, 0.8f, 1.0f});
     sideLabel->setBounds({410, 70, 100, 30});
     sidePanel->addChild(std::move(sideLabel));
-
     mainPanel->addChild(std::move(sidePanel));
+
+    auto btn = std::make_unique<Button>("Click Me", m_font);
+    btn->setBounds({170, 50, 120, 36});
+    btn->setOnClick([]() {
+        LOG_INFO("Button clicked!");
+    });
+    mainPanel->addChild(std::move(btn));
+
     m_rootWidget->addChild(std::move(mainPanel));
 
     glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int w, int h) {

@@ -1,4 +1,5 @@
 #include "widget.h"
+#include "root_widget.h"
 
 namespace orf {
 
@@ -11,6 +12,14 @@ void Widget::addChild(std::unique_ptr<Widget> child) {
 void Widget::removeAllChildren() {
     m_children.clear();
     markDirty();
+}
+
+RootWidget* Widget::getRootWidget() {
+    Widget* root = this;
+    while (root->m_parent) {
+        root = root->m_parent;
+    }
+    return dynamic_cast<RootWidget*>(root);
 }
 
 void Widget::setBounds(const Rect& r) {
@@ -26,6 +35,7 @@ bool Widget::containsPoint(float x, float y) const {
 }
 
 void Widget::markDirty() {
+    if (m_dirty) return;
     m_dirty = true;
     // Propagate up so the root knows a repaint is needed
     if (m_parent) m_parent->markDirty();
@@ -75,6 +85,12 @@ void Widget::routeMouseEvent(MouseEvent& e,
 }
 
 void Widget::onMouseMove(MouseEvent&)    {}
+
+void Widget::onMouseMoveGlobal(float x, float y) {
+    for (auto& child : m_children)
+        child->onMouseMoveGlobal(x, y);
+}
+
 void Widget::onMousePress(MouseEvent&)   {}
 void Widget::onMouseRelease(MouseEvent&) {}
 void Widget::onKey(KeyEvent&)            {}

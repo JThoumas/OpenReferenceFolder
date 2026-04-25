@@ -20,6 +20,8 @@ struct KeyEvent {
     bool consumed = false;
 };
 
+class RootWidget;
+
 class Widget {
 public:
     Widget()          = default;
@@ -34,6 +36,7 @@ public:
     void removeAllChildren();
 
     Widget*              parent()   const { return m_parent; }
+    RootWidget*          getRootWidget();
     const std::vector<std::unique_ptr<Widget>>& children() const { return m_children; }
 
     // --- Layout ---
@@ -54,6 +57,7 @@ public:
     virtual void onLayout();                        // compute children bounds
     virtual void onPaint(Renderer2D& renderer);     // draw self, then children
     virtual void onMouseMove(MouseEvent& e);
+    virtual void onMouseMoveGlobal(float x, float y); // Called on every move to reset states like hover
     virtual void onMousePress(MouseEvent& e);
     virtual void onMouseRelease(MouseEvent& e);
     virtual void onKey(KeyEvent& e);

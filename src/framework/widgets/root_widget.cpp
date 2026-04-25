@@ -11,6 +11,7 @@ void RootWidget::resize(int w, int h) {
 }
 
 void RootWidget::dispatchMouseMove(float x, float y) {
+    onMouseMoveGlobal(x, y);
     MouseEvent e{x, y, -1, -1};
     routeMouseEvent(e, &Widget::onMouseMove);
 }
