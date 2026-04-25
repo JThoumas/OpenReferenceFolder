@@ -17,6 +17,7 @@ public:
     void dispatchMouseMove  (float x, float y);
     void dispatchMousePress (float x, float y, int button);
     void dispatchMouseRelease(float x, float y, int button);
+    void dispatchScroll      (float yOffset);
     void dispatchKey        (int key, int action);
 
     // Paint the entire tree if dirty

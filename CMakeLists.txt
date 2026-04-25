@@ -45,6 +45,7 @@ add_library(orf_framework STATIC
     src/framework/widgets/panel.cpp
     src/framework/widgets/label.cpp
     src/framework/widgets/button.cpp
+    src/framework/widgets/scroll_view.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
 target_link_libraries(orf_framework PUBLIC glad glfw freetype stb)

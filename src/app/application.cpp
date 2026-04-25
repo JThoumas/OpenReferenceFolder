@@ -5,6 +5,7 @@
 #include "framework/widgets/panel.h"
 #include "framework/widgets/label.h"
 #include "framework/widgets/button.h"
+#include "framework/widgets/scroll_view.h"
 
 namespace orf {
 
@@ -78,6 +79,16 @@ bool Application::init(int width, int height, const char* title) {
         LOG_INFO("Button clicked!");
     });
     mainPanel->addChild(std::move(btn));
+
+    auto scroll = std::make_unique<ScrollView>();
+    scroll->setBounds({10, 100, 380, 280});
+    scroll->setContentHeight(1000.0f);
+    for (int i = 0; i < 20; ++i) {
+        auto item = std::make_unique<Label>("Scroll Item #" + std::to_string(i));
+        item->setBounds({10, 10.0f + i * 40.0f, 300, 30});
+        scroll->addChild(std::move(item));
+    }
+    mainPanel->addChild(std::move(scroll));
 
     m_rootWidget->addChild(std::move(mainPanel));
 
@@ -159,6 +170,10 @@ void Application::onMouseButton(int button, int action) {
         else
             m_rootWidget->dispatchMouseRelease((float)x, (float)y, button);
     }
+}
+
+void Application::onScroll(double yOffset) {
+    if (m_rootWidget) m_rootWidget->dispatchScroll((float)yOffset);
 }
 
 } // namespace orf

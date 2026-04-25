@@ -93,6 +93,11 @@ void Widget::onMouseMoveGlobal(float x, float y) {
 
 void Widget::onMousePress(MouseEvent&)   {}
 void Widget::onMouseRelease(MouseEvent&) {}
+
+void Widget::onScroll(float yOffset) {
+    if (m_parent) m_parent->onScroll(yOffset);
+}
+
 void Widget::onKey(KeyEvent&)            {}
 void Widget::onResize(int, int)          {}
 

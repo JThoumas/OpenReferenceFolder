@@ -60,6 +60,7 @@ public:
     virtual void onMouseMoveGlobal(float x, float y); // Called on every move to reset states like hover
     virtual void onMousePress(MouseEvent& e);
     virtual void onMouseRelease(MouseEvent& e);
+    virtual void onScroll(float yOffset);
     virtual void onKey(KeyEvent& e);
     virtual void onResize(int w, int h);            // called when root resizes
 

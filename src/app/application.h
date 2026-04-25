@@ -29,6 +29,7 @@ private:
     void onKey(int key, int action);
     void onMouseMove(double x, double y);
     void onMouseButton(int button, int action);
+    void onScroll(double yOffset);
 
     GLFWwindow* m_window   = nullptr;
     Renderer2D  m_renderer;

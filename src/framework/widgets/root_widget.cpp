@@ -26,6 +26,10 @@ void RootWidget::dispatchMouseRelease(float x, float y, int button) {
     routeMouseEvent(e, &Widget::onMouseRelease);
 }
 
+void RootWidget::dispatchScroll(float yOffset) {
+    onScroll(yOffset);
+}
+
 void RootWidget::dispatchKey(int key, int action) {
     KeyEvent e{key, action};
     // Keyboard goes to root for now — focus system comes in Phase 4
