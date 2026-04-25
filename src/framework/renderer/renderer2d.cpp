@@ -43,9 +43,8 @@ void main() {
     } else {
         int idx = int(v_TexIndex);
         vec4 sampled = texture(u_Textures[idx], v_UV);
-        // For glyph atlas (single channel), use R as alpha.
-        // For regular textures, .r will be non-zero for opaque parts.
-        fragColor = vec4(v_Color.rgb, v_Color.a * sampled.r);
+        // RGBA atlas: sampled.rgb is the color (white), sampled.a is the glyph shape
+        fragColor = vec4(v_Color.rgb * sampled.rgb, v_Color.a * sampled.a);
     }
 }
 )";
@@ -136,6 +135,14 @@ bool Renderer2D::init(int vpWidth, int vpHeight) {
                  GL_RGBA, GL_UNSIGNED_BYTE, &white);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Initialize all texture units with the white texture to prevent
+    // "unloadable unit" errors on macOS/Metal when a unit is unused.
+    for (int i = 0; i < MAX_TEXTURES; ++i) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, m_whiteTexture);
+    }
+    glActiveTexture(GL_TEXTURE0);
 
     // Upload sampler indices once — they don't change
     m_shader.bind();
@@ -252,8 +259,8 @@ void Renderer2D::drawTexturedRect(const Rect& r, GLuint texID, const Color& tint
 void Renderer2D::drawText(const std::string& text, float x, float y,
                            const Font& font, const Color& color) {
     float cursor = x;
-    for (char c : text) {
-        if (c < 0 || c >= 128) continue;
+    for (unsigned char c : text) {
+        if (c >= 128) continue;
         const GlyphMetrics& g = font.glyph(c);
         if (g.width == 0) { cursor += (float)g.advance; continue; }
 
