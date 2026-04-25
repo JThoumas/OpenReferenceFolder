@@ -40,6 +40,7 @@ add_library(orf_framework STATIC
     src/framework/renderer/shader.cpp
     src/framework/renderer/renderer2d.cpp
     src/framework/renderer/font.cpp
+    src/framework/widgets/widget.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
 target_link_libraries(orf_framework PUBLIC glad glfw freetype stb)
