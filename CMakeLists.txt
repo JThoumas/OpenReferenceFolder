@@ -45,8 +45,12 @@ target_include_directories(orf_framework PUBLIC src)
 target_link_libraries(orf_framework PUBLIC glad glfw freetype stb)
 
 # Main executable
-add_executable(OpenReferenceFolder src/app/main.cpp)
+add_executable(OpenReferenceFolder 
+    src/app/main.cpp
+    src/app/application.cpp
+)
 
+target_include_directories(OpenReferenceFolder PRIVATE src)
 target_link_libraries(OpenReferenceFolder PRIVATE orf_framework)
 
 # Platform-specific system libraries
