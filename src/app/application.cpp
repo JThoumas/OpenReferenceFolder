@@ -58,13 +58,28 @@ bool Application::init(int width, int height, const char* title) {
     glfwGetFramebufferSize(m_window, &m_fbWidth, &m_fbHeight);
     if (!m_renderer.init(m_fbWidth, m_fbHeight)) {
         LOG_ERROR("Fatal: Renderer2D initialization failed");
+        shutdown();
         return false;
     }
 
-    // Load font
-    if (!m_font.load("/System/Library/Fonts/Geneva.ttf", 24)) {
-        LOG_ERROR("Warning: Failed to load Geneva.ttf");
+    // TODO: Implement proper cross-platform font discovery/management.
+    // For now, we use hardcoded paths for common system fonts.
+#ifdef __APPLE__
+    const char* defaultFontPath = "/System/Library/Fonts/Geneva.ttf";
+#elif defined(_WIN32)
+    const char* defaultFontPath = "C:\\Windows\\Fonts\\arial.ttf";
+#else
+    const char* defaultFontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+#endif
+
+    if (!m_font.load(defaultFontPath, 24)) {
+        LOG_ERROR("Fatal: Failed to load default font at " << defaultFontPath);
+        shutdown();
+        return false;
     }
+
+    m_rootWidget = std::make_unique<orf::RootWidget>(m_font);
+    m_rootWidget->resize(m_fbWidth, m_fbHeight);
 
     glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int w, int h) {
         auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
@@ -100,24 +115,7 @@ void Application::run() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         m_renderer.begin();
-        
-        // Reproduce Phase 2 test render from main.cpp
-        m_renderer.drawRect({0, 0, (float)m_fbWidth, (float)m_fbHeight}, {0.13f, 0.13f, 0.13f, 1.0f});
-        m_renderer.drawRect({100, 100, 300, 200}, {0.3f, 0.5f, 0.8f, 1.0f});
-        m_renderer.drawRect({250, 200, 200, 150}, {0.8f, 0.3f, 0.3f, 0.9f});
-
-        if (m_font.atlasTextureID() != 0) {
-            m_renderer.drawText("OpenReferenceFolder", 60, 90, m_font, orf::Color::white());
-            m_renderer.drawText("Batched font rendering is working!", 60, 130, m_font, {0.8f, 0.8f, 0.8f, 1.0f});
-        }
-
-        m_renderer.pushClip({500, 100, 200, 100});
-        m_renderer.drawRect({450, 50, 300, 200}, {0.2f, 0.7f, 0.3f, 0.8f});
-        if (m_font.atlasTextureID() != 0) {
-            m_renderer.drawText("This text should be clipped.", 460, 150, m_font, orf::Color::black());
-        }
-        m_renderer.popClip();
-
+        m_rootWidget->paintIfDirty(m_renderer);
         m_renderer.end();
 
         glfwSwapBuffers(m_window);
@@ -138,20 +136,29 @@ void Application::onFramebufferResize(int w, int h) {
     m_fbHeight = h;
     m_renderer.setViewportSize(w, h);
     glViewport(0, 0, w, h);
+    if (m_rootWidget) m_rootWidget->resize(w, h);
 }
 
 void Application::onKey(int key, int action) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(m_window, GLFW_TRUE);
     }
+    if (m_rootWidget) m_rootWidget->dispatchKey(key, action);
 }
 
 void Application::onMouseMove(double x, double y) {
-    // For now, nothing
+    if (m_rootWidget) m_rootWidget->dispatchMouseMove((float)x, (float)y);
 }
 
 void Application::onMouseButton(int button, int action) {
-    // For now, nothing
+    if (m_rootWidget) {
+        double x, y;
+        glfwGetCursorPos(m_window, &x, &y);
+        if (action == GLFW_PRESS)
+            m_rootWidget->dispatchMousePress((float)x, (float)y, button);
+        else
+            m_rootWidget->dispatchMouseRelease((float)x, (float)y, button);
+    }
 }
 
 } // namespace orf
