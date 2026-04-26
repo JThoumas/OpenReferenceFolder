@@ -4,6 +4,8 @@
 #include "framework/renderer/renderer2d.h"
 #include "framework/renderer/font.h"
 #include "framework/docking/dock_manager.h"
+#include "app/model/database.h"
+#include "app/thumbnail/thumbnail_cache.h"
 #include <memory>
 
 namespace orf {
@@ -39,6 +41,9 @@ private:
     GLFWwindow* m_window   = nullptr;
     Renderer2D  m_renderer;
     Font        m_font;
+
+    Database       m_database;
+    ThumbnailCache m_thumbs;
 
     std::unique_ptr<DockManager> m_dockManager;
 

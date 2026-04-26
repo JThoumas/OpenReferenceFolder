@@ -4,6 +4,7 @@
 #include <fstream>
 #include "framework/core/log.h"
 #include "framework/widgets/panel.h"
+#include "app/widgets/file_browser_widget.h"
 #include "framework/widgets/label.h"
 #include "framework/widgets/button.h"
 #include "framework/widgets/scroll_view.h"
@@ -51,6 +52,13 @@ bool Application::init(int width, int height, const char* title) {
         return false;
     }
 
+    if (!m_database.open("orf_data.db")) {
+        LOG_ERROR("Fatal: could not open database");
+        return false;
+    }
+
+    m_thumbs.init();
+
     if (!m_font.load("assets/fonts/Inter-Regular.ttf", 16)) {
         LOG_WARN("Failed to load default font, text rendering may fail");
     }
@@ -94,6 +102,8 @@ void Application::run() {
     while (!glfwWindowShouldClose(m_window)) {
         glfwPollEvents();
 
+        m_thumbs.uploadPending();
+
         if (m_dockManager) m_dockManager->updateFloatingWindows();
 
         glClearColor(0.13f, 0.13f, 0.13f, 1.0f);
@@ -111,6 +121,9 @@ void Application::run() {
 
 void Application::shutdown() {
     saveLayout();
+
+    m_thumbs.shutdown();
+    m_database.close();
 
     m_renderer.shutdown();
 
@@ -190,20 +203,22 @@ void Application::loadLayout() {
         }
     }
 
-    // Fallback: Build a test layout:
-    // Left side: a panel | Right side: a tab group with two tabs
-    auto leftContent  = std::make_unique<Panel>(Color{0.18f, 0.20f, 0.18f, 1.0f});
-    auto leftPanel    = std::make_unique<PanelNode>("Files", std::move(leftContent), m_font);
+    // Fallback: Build the Real Dock Layout
+    auto browser = std::make_unique<FileBrowserWidget>(m_database, m_thumbs, m_font);
+    browser->refresh();
+    browser->setViewMode(BrowserViewMode::Grid);
 
-    auto tabGroup = std::make_unique<TabGroupNode>(m_font);
-    tabGroup->addTab("Preview", std::make_unique<Panel>(Color{0.15f, 0.15f, 0.20f, 1.0f}));
-    tabGroup->addTab("Properties", std::make_unique<Panel>(Color{0.20f, 0.15f, 0.15f, 1.0f}));
+    auto browserPanel = std::make_unique<PanelNode>("Reference Folder", std::move(browser), m_font);
+
+    auto propsContent = std::make_unique<Panel>(Color{0.14f, 0.14f, 0.17f, 1.0f});
+    auto propsTab = std::make_unique<TabGroupNode>(m_font);
+    propsTab->addTab("Properties", std::move(propsContent));
 
     auto root = std::make_unique<SplitNode>(
         SplitAxis::Horizontal,
-        std::move(leftPanel),
-        std::move(tabGroup),
-        0.28f
+        std::move(browserPanel),
+        std::move(propsTab),
+        0.30f
     );
 
     m_dockManager->setRoot(std::move(root));

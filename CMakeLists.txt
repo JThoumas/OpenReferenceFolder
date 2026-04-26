@@ -40,6 +40,11 @@ target_include_directories(glad PUBLIC extern/glad/include)
 add_library(stb STATIC extern/stb/stb_image.cpp)
 target_include_directories(stb PUBLIC extern/stb)
 
+# SQLite3
+add_library(sqlite3 STATIC extern/sqlite/sqlite3.c)
+target_include_directories(sqlite3 PUBLIC extern/sqlite)
+target_compile_definitions(sqlite3 PRIVATE SQLITE_THREADSAFE=1)
+
 # Framework library
 add_library(orf_framework STATIC
     src/framework/core/framework.cpp
@@ -51,15 +56,34 @@ add_library(orf_framework STATIC
     src/framework/widgets/label.cpp
     src/framework/widgets/button.cpp
     src/framework/widgets/scroll_view.cpp
+    src/framework/widgets/context_menu.cpp
     src/framework/docking/dock_node.cpp
     src/framework/docking/split_node.cpp
     src/framework/docking/panel_node.cpp
     src/framework/docking/tab_group_node.cpp
     src/framework/docking/dock_manager.cpp
     src/framework/docking/floating_window.cpp
+    src/app/model/database.cpp
+    src/app/thumbnail/thumbnail_cache.cpp
+    src/app/widgets/file_browser_widget.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
-target_link_libraries(orf_framework PUBLIC glad glfw freetype stb nlohmann_json::nlohmann_json)
+target_link_libraries(orf_framework PUBLIC glad glfw freetype stb nlohmann_json::nlohmann_json sqlite3)
+
+# Platform-specific system libraries & sources
+if(APPLE)
+    target_sources(orf_framework PRIVATE src/platform/macos/file_dialog.mm)
+    target_link_libraries(orf_framework PUBLIC "-framework AppKit" "-framework Foundation")
+elseif(WIN32)
+    target_sources(orf_framework PRIVATE src/platform/windows/file_dialog.cpp)
+else()
+    target_sources(orf_framework PRIVATE src/platform/linux/file_dialog.cpp)
+endif()
+
+# Required on Linux/macOS for SQLite's dynamic loading internals
+if(UNIX)
+    target_link_libraries(sqlite3 PRIVATE dl pthread)
+endif()
 
 # Main executable
 add_executable(OpenReferenceFolder 
@@ -70,7 +94,6 @@ add_executable(OpenReferenceFolder
 target_include_directories(OpenReferenceFolder PRIVATE src)
 target_link_libraries(OpenReferenceFolder PRIVATE orf_framework)
 
-# Platform-specific system libraries
 if (WIN32)
     target_link_libraries(OpenReferenceFolder PRIVATE opengl32)
 elseif (APPLE)
