@@ -20,11 +20,17 @@ FetchContent_Declare(
     GIT_TAG        VER-2-13-2
 )
 
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG        v3.11.3
+)
+
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(glfw freetype)
+FetchContent_MakeAvailable(glfw freetype nlohmann_json)
 
 # Build GLAD as a small static library
 add_library(glad STATIC extern/glad/src/glad.c)
@@ -41,14 +47,19 @@ add_library(orf_framework STATIC
     src/framework/renderer/renderer2d.cpp
     src/framework/renderer/font.cpp
     src/framework/widgets/widget.cpp
-    src/framework/widgets/root_widget.cpp
     src/framework/widgets/panel.cpp
     src/framework/widgets/label.cpp
     src/framework/widgets/button.cpp
     src/framework/widgets/scroll_view.cpp
+    src/framework/docking/dock_node.cpp
+    src/framework/docking/split_node.cpp
+    src/framework/docking/panel_node.cpp
+    src/framework/docking/tab_group_node.cpp
+    src/framework/docking/dock_manager.cpp
+    src/framework/docking/floating_window.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
-target_link_libraries(orf_framework PUBLIC glad glfw freetype stb)
+target_link_libraries(orf_framework PUBLIC glad glfw freetype stb nlohmann_json::nlohmann_json)
 
 # Main executable
 add_executable(OpenReferenceFolder 

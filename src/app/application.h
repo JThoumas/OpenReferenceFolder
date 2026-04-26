@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "framework/renderer/renderer2d.h"
 #include "framework/renderer/font.h"
-#include "framework/widgets/root_widget.h"
+#include "framework/docking/dock_manager.h"
 #include <memory>
 
 namespace orf {
@@ -31,11 +31,20 @@ private:
     void onMouseButton(int button, int action);
     void onScroll(double yOffset);
 
+    void saveLayout();
+    void loadLayout();
+
+    void updateCursor(float x, float y);
+
     GLFWwindow* m_window   = nullptr;
     Renderer2D  m_renderer;
     Font        m_font;
 
-    std::unique_ptr<RootWidget> m_rootWidget;
+    std::unique_ptr<DockManager> m_dockManager;
+
+    GLFWcursor* m_cursorArrow  = nullptr;
+    GLFWcursor* m_cursorHSplit = nullptr;
+    GLFWcursor* m_cursorVSplit = nullptr;
 
     int m_fbWidth  = 0;
     int m_fbHeight = 0;
