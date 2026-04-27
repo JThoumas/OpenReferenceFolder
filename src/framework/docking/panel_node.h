@@ -20,6 +20,7 @@ public:
 
     void layout(const Rect& bounds) override;
     void paint (Renderer2D& renderer) override;
+    void markDirty() override;
 
     nlohmann::json serialize() const override;
 

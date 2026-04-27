@@ -1,4 +1,5 @@
 #include "split_node.h"
+#include "framework/theme/theme_manager.h"
 #include <algorithm>
 
 namespace orf {
@@ -31,6 +32,11 @@ void SplitNode::layout(const Rect& bounds) {
     }
 }
 
+void SplitNode::markDirty() {
+    m_first->markDirty();
+    m_second->markDirty();
+}
+
 Rect SplitNode::dividerRect() const {
     if (m_axis == SplitAxis::Horizontal) {
         float firstW = (m_bounds.width - DIVIDER_THICKNESS) * m_ratio;
@@ -60,8 +66,8 @@ void SplitNode::paint(Renderer2D& renderer) {
 
     // Draw divider — slightly brighter when being dragged
     Color divColor = m_dragging
-        ? Color{0.35f, 0.35f, 0.40f, 1.0f}
-        : Color{0.10f, 0.10f, 0.12f, 1.0f};
+        ? theme().dividerHovered
+        : theme().divider;
     renderer.drawRect(dividerRect(), divColor);
 }
 

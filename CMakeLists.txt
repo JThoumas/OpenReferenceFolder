@@ -51,6 +51,7 @@ add_library(orf_framework STATIC
     src/framework/renderer/shader.cpp
     src/framework/renderer/renderer2d.cpp
     src/framework/renderer/font.cpp
+    src/framework/theme/theme_manager.cpp
     src/framework/widgets/widget.cpp
     src/framework/widgets/panel.cpp
     src/framework/widgets/label.cpp
@@ -66,6 +67,7 @@ add_library(orf_framework STATIC
     src/app/model/database.cpp
     src/app/thumbnail/thumbnail_cache.cpp
     src/app/widgets/file_browser_widget.cpp
+    src/app/widgets/display_center_widget.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
 target_link_libraries(orf_framework PUBLIC glad glfw freetype stb nlohmann_json::nlohmann_json sqlite3)

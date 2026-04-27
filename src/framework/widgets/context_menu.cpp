@@ -1,4 +1,5 @@
 #include "context_menu.h"
+#include "framework/theme/theme_manager.h"
 #include <algorithm>
 
 namespace orf {
@@ -47,7 +48,7 @@ void ContextMenu::onPaint(Renderer2D& renderer) {
 
     // Shadow/Border
     renderer.drawRect({m_bounds.x + 2, m_bounds.y + 2, m_bounds.width, m_bounds.height}, {0, 0, 0, 0.3f});
-    renderer.drawRect(m_bounds, {0.18f, 0.18f, 0.20f, 1.0f});
+    renderer.drawRect(m_bounds, theme().contextMenuBackground);
     
     float curY = m_bounds.y + 2.0f;
     for (int i = 0; i < (int)m_items.size(); ++i) {
@@ -55,15 +56,15 @@ void ContextMenu::onPaint(Renderer2D& renderer) {
         float h = item.separator ? SEP_HEIGHT : ITEM_HEIGHT;
 
         if (item.separator) {
-            renderer.drawRect({m_bounds.x + 4, curY + SEP_HEIGHT/2 - 0.5f, m_bounds.width - 8, 1}, {0.25f, 0.25f, 0.28f, 1.0f});
+            renderer.drawRect({m_bounds.x + 4, curY + SEP_HEIGHT/2 - 0.5f, m_bounds.width - 8, 1}, theme().contextMenuSeparator);
         } else {
             bool hovered = (i == m_hoveredIdx);
             if (hovered) {
-                renderer.drawRect({m_bounds.x + 2, curY, m_bounds.width - 4, ITEM_HEIGHT}, {0.25f, 0.45f, 0.75f, 1.0f});
+                renderer.drawRect({m_bounds.x + 2, curY, m_bounds.width - 4, ITEM_HEIGHT}, theme().contextMenuHover);
             }
             
             renderer.drawText(item.label, m_bounds.x + 10, curY + ITEM_HEIGHT * 0.5f + m_font.lineHeight() * 0.35f, 
-                               m_font, hovered ? Color::white() : Color{0.85f, 0.85f, 0.85f, 1.0f});
+                               m_font, hovered ? Color::white() : theme().contextMenuText);
         }
         curY += h;
     }

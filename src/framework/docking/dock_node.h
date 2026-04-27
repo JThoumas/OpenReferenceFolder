@@ -17,7 +17,11 @@ public:
     virtual void paint (Renderer2D& renderer) = 0;
 
     virtual nlohmann::json serialize() const = 0;
-    static std::unique_ptr<DockNode> deserialize(const nlohmann::json& j, Font& font);
+    static std::unique_ptr<DockNode> deserialize(const nlohmann::json& j, Font& font, 
+                                                class Database* db = nullptr, 
+                                                class ThumbnailCache* thumbs = nullptr);
+
+    virtual void markDirty() = 0;
 
     // Input — returns true if the node consumed the event
     virtual bool handleMouseMove   (float x, float y) { return false; }

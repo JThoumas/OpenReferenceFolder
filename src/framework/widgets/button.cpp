@@ -1,4 +1,5 @@
 #include "button.h"
+#include "framework/theme/theme_manager.h"
 
 namespace orf {
 
@@ -17,17 +18,17 @@ void Button::setOnClick(std::function<void()> callback) {
 void Button::onPaint(Renderer2D& renderer) {
     if (!m_visible) return;
 
-    // Pick fill color based on state
-    const Color& fill = (m_state == State::Pressed) ? colorPressed
-                      : (m_state == State::Hovered)  ? colorHover
-                                                      : colorNormal;
+    // Pick fill color based on state from theme
+    const Color& fill = (m_state == State::Pressed) ? theme().buttonPressed
+                      : (m_state == State::Hovered)  ? theme().buttonHover
+                                                      : theme().buttonNormal;
     renderer.drawRect(m_bounds, fill);
 
     // Center the label text within the button bounds
     // Center properly based on lineHeight
     float textX = m_bounds.x + 8.0f;
     float textY = m_bounds.y + (m_bounds.height * 0.5f) + (m_font.lineHeight() * 0.3f);
-    renderer.drawText(m_label, textX, textY, m_font, colorLabel);
+    renderer.drawText(m_label, textX, textY, m_font, theme().buttonText);
 
     paintChildren(renderer);
     clearDirty();

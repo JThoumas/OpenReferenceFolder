@@ -6,6 +6,7 @@
 #include "framework/docking/dock_manager.h"
 #include "app/model/database.h"
 #include "app/thumbnail/thumbnail_cache.h"
+#include "framework/theme/theme_manager.h"
 #include <memory>
 
 namespace orf {
@@ -23,6 +24,8 @@ public:
     void run();
     void shutdown();
 
+    void markAllDirty();
+
     Renderer2D& renderer() { return m_renderer; }
     Font&       font()     { return m_font; }
 
@@ -33,8 +36,8 @@ private:
     void onMouseButton(int button, int action);
     void onScroll(double yOffset);
 
-    void saveLayout();
-    void loadLayout();
+    void saveLayout(const std::string& name = "layout");
+    void loadLayout(const std::string& name = "layout");
 
     void updateCursor(float x, float y);
 

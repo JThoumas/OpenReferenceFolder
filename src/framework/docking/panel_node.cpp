@@ -1,4 +1,5 @@
 #include "panel_node.h"
+#include "framework/theme/theme_manager.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -25,11 +26,15 @@ void PanelNode::layout(const Rect& bounds) {
     m_content->onLayout();
 }
 
+void PanelNode::markDirty() {
+    m_content->markDirty();
+}
+
 void PanelNode::paint(Renderer2D& renderer) {
     // Title bar background
     renderer.drawRect(
         {m_bounds.x, m_bounds.y, m_bounds.width, TITLE_BAR_HEIGHT},
-        {0.15f, 0.15f, 0.18f, 1.0f}
+        theme().titleBarBackground
     );
     // Title text
     renderer.drawText(
@@ -37,7 +42,7 @@ void PanelNode::paint(Renderer2D& renderer) {
         m_bounds.x + 8.0f,
         m_bounds.y + m_font.lineHeight(),
         m_font,
-        {0.8f, 0.8f, 0.8f, 1.0f}
+        theme().titleBarText
     );
     // Content area
     renderer.pushClip({

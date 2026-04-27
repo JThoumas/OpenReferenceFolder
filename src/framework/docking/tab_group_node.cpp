@@ -1,4 +1,5 @@
 #include "tab_group_node.h"
+#include "framework/theme/theme_manager.h"
 #include <algorithm>
 
 namespace orf {
@@ -49,11 +50,17 @@ void TabGroupNode::layout(const Rect& bounds) {
     }
 }
 
+void TabGroupNode::markDirty() {
+    for (auto& tab : m_tabs) {
+        tab.content->markDirty();
+    }
+}
+
 void TabGroupNode::paint(Renderer2D& renderer) {
     // Tab bar background
     renderer.drawRect(
         {m_bounds.x, m_bounds.y, m_bounds.width, TAB_BAR_HEIGHT},
-        {0.12f, 0.12f, 0.14f, 1.0f}
+        theme().tabBarBackground
     );
 
     // Individual tabs
@@ -62,14 +69,14 @@ void TabGroupNode::paint(Renderer2D& renderer) {
             Rect tr   = tabRect(i);
             bool active = (i == m_activeTab);
             renderer.drawRect(tr, active
-                ? Color{0.20f, 0.20f, 0.24f, 1.0f}
-                : Color{0.14f, 0.14f, 0.16f, 1.0f});
+                ? theme().tabActive
+                : theme().tabInactive);
             renderer.drawText(
                 m_tabs[i].title,
                 tr.x + 8.0f,
                 tr.y + m_font.lineHeight() + 4.0f,
                 m_font,
-                active ? Color::white() : Color{0.6f, 0.6f, 0.6f, 1.0f}
+                active ? theme().tabActiveText : theme().tabInactiveText
             );
         }
 

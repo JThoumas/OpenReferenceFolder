@@ -5,7 +5,7 @@
 #include "framework/core/log.h"
 #include "framework/widgets/panel.h"
 #include "app/widgets/file_browser_widget.h"
-#include "framework/widgets/label.h"
+#include "app/widgets/display_center_widget.h"
 #include "framework/widgets/button.h"
 #include "framework/widgets/scroll_view.h"
 
@@ -59,6 +59,18 @@ bool Application::init(int width, int height, const char* title) {
 
     m_thumbs.init();
 
+    // Theme initialization
+    std::filesystem::create_directories("themes");
+    if (!std::filesystem::exists("themes/orf-dark.json")) {
+        ThemeManager::get().resetToDefault();
+        ThemeManager::get().saveToFile("themes/orf-dark.json");
+    }
+    ThemeManager::get().loadFromFile("themes/orf-dark.json");
+
+    ThemeManager::get().onThemeChanged([this]() {
+        markAllDirty();
+    });
+
     if (!m_font.load("assets/fonts/Inter-Regular.ttf", 16)) {
         LOG_WARN("Failed to load default font, text rendering may fail");
     }
@@ -106,7 +118,7 @@ void Application::run() {
 
         if (m_dockManager) m_dockManager->updateFloatingWindows();
 
-        glClearColor(0.13f, 0.13f, 0.13f, 1.0f);
+        glClearColor(theme().windowBackground.r, theme().windowBackground.g, theme().windowBackground.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         m_renderer.begin();
@@ -150,7 +162,6 @@ void Application::onKey(int key, int action) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(m_window, GLFW_TRUE);
     }
-    // DockManager doesn't handle keys yet in this phase
 }
 
 void Application::onMouseMove(double x, double y) {
@@ -172,36 +183,45 @@ void Application::onMouseButton(int button, int action) {
 }
 
 void Application::onScroll(double yOffset) {
-    // DockManager doesn't handle scroll yet
 }
 
-void Application::saveLayout() {
-    if (!m_dockManager) return;
-    
-    nlohmann::json j = m_dockManager->serialize();
-    std::ofstream file("layout.json");
-    if (file.is_open()) {
-        file << j.dump(4);
-        LOG_INFO("Layout saved to layout.json");
+void Application::markAllDirty() {
+    if (m_dockManager && m_dockManager->root()) {
+        m_dockManager->root()->markDirty();
     }
 }
 
-void Application::loadLayout() {
-    std::ifstream file("layout.json");
+void Application::saveLayout(const std::string& name) {
+    if (!m_dockManager) return;
+    
+    nlohmann::json j = m_dockManager->serialize();
+    std::string path = (name == "layout") ? "layout.json" : "workspaces/" + name + ".json";
+    std::ofstream file(path);
+    if (file.is_open()) {
+        file << j.dump(4);
+        LOG_INFO("Layout saved to " << path);
+    }
+}
+
+void Application::loadLayout(const std::string& name) {
+    std::string path = (name == "layout") ? "layout.json" : "workspaces/" + name + ".json";
+    std::ifstream file(path);
     if (file.is_open()) {
         try {
             nlohmann::json j;
             file >> j;
-            auto root = DockNode::deserialize(j, m_font);
+            auto root = DockNode::deserialize(j, m_font, &m_database, &m_thumbs);
             if (root) {
                 m_dockManager->setRoot(std::move(root));
-                LOG_INFO("Layout loaded from layout.json");
+                LOG_INFO("Layout loaded from " << path);
                 return;
             }
         } catch (const std::exception& e) {
             LOG_ERROR("Failed to load layout: " << e.what());
         }
     }
+
+    if (name != "layout") return; // Don't build fallback for custom workspace if file missing
 
     // Fallback: Build the Real Dock Layout
     auto browser = std::make_unique<FileBrowserWidget>(m_database, m_thumbs, m_font);
@@ -210,14 +230,25 @@ void Application::loadLayout() {
 
     auto browserPanel = std::make_unique<PanelNode>("Reference Folder", std::move(browser), m_font);
 
-    auto propsContent = std::make_unique<Panel>(Color{0.14f, 0.14f, 0.17f, 1.0f});
-    auto propsTab = std::make_unique<TabGroupNode>(m_font);
-    propsTab->addTab("Properties", std::move(propsContent));
+    auto dcWidgetPtr = std::make_unique<DisplayCenterWidget>(m_font, ThemeManager::get(), m_database);
+    DisplayCenterWidget* dcWidget = dcWidgetPtr.get();
+    
+    dcWidget->setOnSaveWorkspace([this](const std::string& name) {
+        saveLayout(name);
+    });
+    dcWidget->setOnApplyWorkspace([this](const std::string& name) {
+        loadLayout(name);
+    });
+    dcWidget->setOnDeleteWorkspace([](const std::string& name) {
+        // file deletion handled in dcWidget for now
+    });
+
+    auto dcPanel = std::make_unique<PanelNode>("Display Center", std::move(dcWidgetPtr), m_font);
 
     auto root = std::make_unique<SplitNode>(
         SplitAxis::Horizontal,
         std::move(browserPanel),
-        std::move(propsTab),
+        std::move(dcPanel),
         0.30f
     );
 

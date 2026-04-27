@@ -1,4 +1,5 @@
 #include "scroll_view.h"
+#include "framework/theme/theme_manager.h"
 #include <algorithm>
 
 namespace orf {
@@ -21,7 +22,11 @@ void ScrollView::onScroll(float yOffset) {
 void ScrollView::onPaint(Renderer2D& renderer) {
     if (!m_visible) return;
 
-    renderer.drawRect(m_bounds, m_background);
+    if (m_background.a > 0.0f) {
+        renderer.drawRect(m_bounds, m_background);
+    } else {
+        renderer.drawRect(m_bounds, theme().windowBackground);
+    }
 
     // Clip children to the scroll view's bounds
     renderer.pushClip(m_bounds);
@@ -55,7 +60,7 @@ void ScrollView::paintScrollbar(Renderer2D& renderer) {
 
     // Track
     renderer.drawRect({trackX, m_bounds.y, trackW, trackH},
-                       {0.1f, 0.1f, 0.1f, 0.6f});
+                       theme().scrollbarTrack);
 
     // Thumb — size proportional to visible/total ratio
     float thumbH   = (m_bounds.height / m_contentHeight) * trackH;
@@ -63,7 +68,7 @@ void ScrollView::paintScrollbar(Renderer2D& renderer) {
     float thumbY   = m_bounds.y + (m_scrollOffset / maxOffset) * (trackH - thumbH);
 
     renderer.drawRect({trackX, thumbY, trackW, thumbH},
-                       {0.45f, 0.45f, 0.5f, 0.9f});
+                       theme().scrollbarThumb);
 }
 
 } // namespace orf

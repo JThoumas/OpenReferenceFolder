@@ -1,6 +1,7 @@
 #include "file_browser_widget.h"
 #include "framework/core/log.h"
 #include "platform/file_dialog.h"
+#include "framework/theme/theme_manager.h"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -43,7 +44,7 @@ float FileBrowserWidget::maxScrollOffset() const {
     float contentH = (m_viewMode == BrowserViewMode::List)
         ? m_flatList.size() * ROW_HEIGHT
         : std::ceil((float)m_flatList.size()
-                    / std::max(1, (int)(m_bounds.width / THUMB_GRID_SIZE)))
+                    / (float)std::max(1, (int)(m_bounds.width / THUMB_GRID_SIZE)))
           * THUMB_GRID_SIZE;
     return std::max(0.0f, contentH - m_bounds.height);
 }
@@ -65,7 +66,7 @@ void FileBrowserWidget::onPaint(Renderer2D& renderer) {
     if (!m_visible) return;
 
     // Background
-    renderer.drawRect(m_bounds, {0.13f, 0.13f, 0.15f, 1.0f});
+    renderer.drawRect(m_bounds, theme().browserBackground);
 
     renderer.pushClip(m_bounds);
 
@@ -98,12 +99,12 @@ void FileBrowserWidget::paintList(Renderer2D& renderer) {
         if (selected)
             renderer.drawRect(
                 {m_bounds.x, y, m_bounds.width, ROW_HEIGHT},
-                {0.25f, 0.45f, 0.75f, 1.0f}
+                theme().browserSelected
             );
         else if (i % 2 == 0)
             renderer.drawRect(
                 {m_bounds.x, y, m_bounds.width, ROW_HEIGHT},
-                {0.0f, 0.0f, 0.0f, 0.08f}
+                theme().browserRowOdd
             );
 
         float indent = m_bounds.x + fn.depth * INDENT_WIDTH + 6.0f;
@@ -113,7 +114,7 @@ void FileBrowserWidget::paintList(Renderer2D& renderer) {
             renderer.drawText(
                 fn.node->isExpanded ? "▼" : "▶",
                 indent, y + ROW_HEIGHT * 0.5f + m_font.lineHeight() * 0.35f,
-                m_font, {0.5f, 0.5f, 0.5f, 1.0f}
+                m_font, theme().textSecondary
             );
             indent += 14.0f;
         }
@@ -137,7 +138,7 @@ void FileBrowserWidget::paintList(Renderer2D& renderer) {
             indent,
             y + ROW_HEIGHT * 0.5f + m_font.lineHeight() * 0.35f,
             m_font,
-            selected ? Color::white() : Color{0.85f, 0.85f, 0.85f, 1.0f}
+            selected ? theme().browserSelectedText : theme().browserText
         );
     }
 }
@@ -164,7 +165,7 @@ void FileBrowserWidget::paintGrid(Renderer2D& renderer) {
         if (selected)
             renderer.drawRect(
                 {x, y, cellW, cellH},
-                {0.25f, 0.45f, 0.75f, 0.4f}
+                theme().browserSelected
             );
 
         // Thumbnail
@@ -183,7 +184,7 @@ void FileBrowserWidget::paintGrid(Renderer2D& renderer) {
             // Folder icon — colored rect placeholder until Phase 6 icons
             renderer.drawRect(
                 {x + THUMB_PADDING, thumbY, thumbSize, thumbSize - 20.0f},
-                {0.28f, 0.52f, 0.70f, 0.6f}
+                theme().folderIcon
             );
         }
 
@@ -193,7 +194,7 @@ void FileBrowserWidget::paintGrid(Renderer2D& renderer) {
             x + THUMB_PADDING,
             y + cellH - 14.0f,
             m_font,
-            Color{0.85f, 0.85f, 0.85f, 1.0f}
+            theme().browserText
         );
     }
 }
@@ -207,14 +208,14 @@ void FileBrowserWidget::paintScrollbar(Renderer2D& renderer) {
     float trackH = m_bounds.height;
 
     renderer.drawRect({trackX, m_bounds.y, trackW, trackH},
-                       {0.08f, 0.08f, 0.10f, 0.8f});
+                       theme().scrollbarTrack);
 
     float thumbH = (m_bounds.height / total) * trackH;
     float thumbY = m_bounds.y
                  + (m_scrollOffset / maxScrollOffset()) * (trackH - thumbH);
 
     renderer.drawRect({trackX, thumbY, trackW, thumbH},
-                       {0.40f, 0.40f, 0.45f, 0.9f});
+                       theme().scrollbarThumb);
 }
 
 int FileBrowserWidget::nodeAtY(float y) const {
