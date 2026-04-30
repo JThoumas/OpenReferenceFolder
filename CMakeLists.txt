@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 project(OpenReferenceFolder VERSION 0.1.0 LANGUAGES C CXX)
 
 # C++17 is required - std::filesystem is used for file operations
@@ -52,6 +53,10 @@ add_library(orf_framework STATIC
     src/framework/renderer/renderer2d.cpp
     src/framework/renderer/font.cpp
     src/framework/theme/theme_manager.cpp
+    src/framework/regions/region_manager.cpp
+    src/framework/regions/collapsible_region.cpp
+    src/framework/regions/center_work_area.cpp
+    src/framework/regions/top_bar.cpp
     src/framework/widgets/widget.cpp
     src/framework/widgets/panel.cpp
     src/framework/widgets/label.cpp
