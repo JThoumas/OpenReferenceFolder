@@ -30,10 +30,18 @@ public:
     void onScroll(float delta);
 
 private:
+    void paintExpanded (Renderer2D& renderer);
+    void paintCollapsed(Renderer2D& renderer);
+
+    Rect  toggleButtonRect()    const;
+    bool  toggleButtonContains(float x, float y) const;
+    const char* toggleLabel()   const; // "‹" / "›" / "ˆ" / "ˇ"
+
     Side m_side;
     Font& m_font;
     Rect m_bounds{};
     bool m_collapsed = false;
+    bool m_btnHovered = false;
     std::unique_ptr<TabGroupNode> m_content;
 };
 
