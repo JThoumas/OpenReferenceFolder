@@ -26,6 +26,8 @@ public:
     void setActiveTab(int index);
     int  activeTab() const { return m_activeTab; }
     int  tabCount()  const { return static_cast<int>(m_tabs.size()); }
+    const std::string& tabTitle(int index) const;
+    bool               removeTab(const std::string& title);
 
     void layout(const Rect& bounds) override;
     void paint (Renderer2D& renderer) override;

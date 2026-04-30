@@ -73,6 +73,7 @@ add_library(orf_framework STATIC
     src/app/thumbnail/thumbnail_cache.cpp
     src/app/widgets/file_browser_widget.cpp
     src/app/widgets/display_center_widget.cpp
+    src/app/widgets/pure_view_widget.cpp
 )
 target_include_directories(orf_framework PUBLIC src)
 target_link_libraries(orf_framework PUBLIC glad glfw freetype stb nlohmann_json::nlohmann_json sqlite3)

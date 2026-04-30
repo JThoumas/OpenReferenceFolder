@@ -3,7 +3,9 @@
 
 namespace orf {
 
-CenterWorkArea::CenterWorkArea(Font& font) : m_font(font) {
+CenterWorkArea::CenterWorkArea(Font& font)
+    : m_font(font)
+{
     m_tabs = std::make_unique<TabGroupNode>(font);
 }
 
@@ -14,18 +16,24 @@ void CenterWorkArea::setBounds(const Rect& r) {
     if (m_tabs) m_tabs->layout(r);
 }
 
-void CenterWorkArea::addTab(const std::string& title, std::unique_ptr<Widget> content) {
-    if (m_tabs) m_tabs->addTab(title, std::move(content));
+void CenterWorkArea::addTab(const std::string& title,
+                             std::unique_ptr<Widget> content) {
+    m_tabs->addTab(title, std::move(content));
+    m_tabs->setActiveTab(m_tabs->tabCount() - 1);
 }
 
 bool CenterWorkArea::focusTab(const std::string& title) {
-    // Implementation will be refined in Task 4
+    for (int i = 0; i < m_tabs->tabCount(); ++i) {
+        if (m_tabs->tabTitle(i) == title) {
+            m_tabs->setActiveTab(i);
+            return true;
+        }
+    }
     return false;
 }
 
 bool CenterWorkArea::closeTab(const std::string& title) {
-    // Implementation will be refined in Task 4
-    return false;
+    return m_tabs->removeTab(title);
 }
 
 void CenterWorkArea::paint(Renderer2D& renderer) {
@@ -45,11 +53,10 @@ void CenterWorkArea::onMouseRelease(float x, float y, int button) {
 }
 
 void CenterWorkArea::onScroll(float delta) {
-    // Scroll handling will be implemented later
+    // Scroll handling to active tab's ScrollView will be implemented later
 }
 
 void CenterWorkArea::onKey(int key, int action) {
-    // Key handling will be implemented later
 }
 
 } // namespace orf

@@ -12,7 +12,27 @@ void TabGroupNode::addTab(const std::string& title,
 }
 
 void TabGroupNode::setActiveTab(int index) {
-    m_activeTab = std::clamp(index, 0, (int)m_tabs.size() - 1);
+    if (index >= 0 && index < (int)m_tabs.size()) {
+        m_activeTab = index;
+        markDirty();
+    }
+}
+
+const std::string& TabGroupNode::tabTitle(int i) const {
+    return m_tabs[i].title;
+}
+
+bool TabGroupNode::removeTab(const std::string& title) {
+    for (auto it = m_tabs.begin(); it != m_tabs.end(); ++it) {
+        if (it->title == title) {
+            m_tabs.erase(it);
+            m_activeTab = std::clamp(m_activeTab, 0,
+                          std::max(0, (int)m_tabs.size() - 1));
+            markDirty();
+            return true;
+        }
+    }
+    return false;
 }
 
 Rect TabGroupNode::tabRect(int index) const {
