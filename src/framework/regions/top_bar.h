@@ -33,12 +33,23 @@ public:
     void onMousePress(float x, float y, int button);
     void onMouseRelease(float x, float y, int button);
 
+    // Called by Application when user clicks outside the bar
     void dismissMenu();
 
 private:
-    Font& m_font;
-    Rect m_bounds{};
+    Rect menuLabelRect(int menuIdx) const;
+    int  menuAt(float x, float y)   const; // returns menu index or -1
+    int  entryAt(float x, float y)  const; // returns entry index within open menu
+
+    void paintDropdown(Renderer2D& renderer);
+
+    Font&             m_font;
+    Rect              m_bounds{};
     std::vector<Menu> m_menus;
+
+    int m_openMenu     = -1;  // -1 = none open
+    int m_hoveredMenu  = -1;
+    int m_hoveredEntry = -1;
 };
 
 } // namespace orf
