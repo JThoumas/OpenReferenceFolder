@@ -6,6 +6,10 @@
 #include "framework/widgets/panel.h"
 #include "app/widgets/file_browser_widget.h"
 #include "app/widgets/display_center_widget.h"
+#include "app/widgets/pure_view_widget.h"
+#include "framework/regions/collapsible_region.h"
+#include "framework/regions/center_work_area.h"
+#include "framework/regions/top_bar.h"
 #include "framework/widgets/button.h"
 #include "framework/widgets/scroll_view.h"
 
@@ -79,10 +83,93 @@ bool Application::init(int width, int height, const char* title) {
     m_cursorHSplit = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
     m_cursorVSplit = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
 
-    m_dockManager = std::make_unique<DockManager>(m_font);
+    m_regionManager = std::make_unique<RegionManager>(m_font);
+    m_regionManager->init(m_fbWidth, m_fbHeight);
 
-    loadLayout();
-    m_dockManager->resize(m_fbWidth, m_fbHeight);
+    // ── Left Region: File Browser ──────────────────────────────────────────
+    auto browser = std::make_unique<FileBrowserWidget>(m_database, m_thumbs, m_font);
+    browser->refresh();
+    browser->setViewMode(BrowserViewMode::Grid);
+
+    // Single-click → update sidebar PureView
+    browser->setOnSelect([this](const ORFNode& node) {
+        if (!node.hasRealPath() || node.isFolder()) return;
+        if (m_sidebarPureView)
+            m_sidebarPureView->loadFile(node.realPath);
+    });
+
+    // Double-click → pin a PureView tab in the Center
+    browser->setOnOpen([this](const ORFNode& node) {
+        if (!node.hasRealPath() || node.isFolder()) return;
+        std::string tabTitle = node.displayName;
+
+        // Reuse existing tab if already open
+        if (!m_regionManager->center()->focusTab(tabTitle)) {
+            auto pv = std::make_unique<PureViewWidget>(
+                PureViewWidget::Mode::Pinned, m_thumbs, m_font);
+            pv->loadFile(node.realPath);
+            m_regionManager->center()->addTab(tabTitle, std::move(pv));
+        }
+    });
+
+    m_regionManager->leftRegion()->addTab("Files", std::move(browser));
+
+    // ── Right Region: Sidebar PureView + Display Center ───────────────────
+    auto sidePreview = std::make_unique<PureViewWidget>(
+        PureViewWidget::Mode::Sidebar, m_thumbs, m_font);
+    m_sidebarPureView = sidePreview.get(); // store raw ptr for callbacks above
+    m_regionManager->rightRegion()->addTab("Preview", std::move(sidePreview));
+
+    auto dcWidgetPtr = std::make_unique<DisplayCenterWidget>(m_font, ThemeManager::get(), m_database);
+    dcWidgetPtr->setOnSaveWorkspace([this](const std::string& name) {
+        saveLayout(name);
+    });
+    dcWidgetPtr->setOnApplyWorkspace([this](const std::string& name) {
+        loadLayout(name);
+    });
+    
+    m_regionManager->rightRegion()->addTab("Display Center", std::move(dcWidgetPtr));
+
+    // ── Bottom Region: placeholder for future metadata / log panel ─────────
+    auto logPanel = std::make_unique<Panel>(theme().panelBackground);
+    m_regionManager->bottomRegion()->addTab("Log", std::move(logPanel));
+    m_regionManager->bottomRegion()->setCollapsed(true);
+
+    // ── Center: Start with a welcome / empty state ─────────────────────────
+    auto welcome = std::make_unique<Panel>(theme().windowBackground);
+    m_regionManager->center()->addTab("Welcome", std::move(welcome));
+
+    // ── Top Bar Menus ──────────────────────────────────────────────────────
+    Menu fileMenu;
+    fileMenu.label = "File";
+    fileMenu.entries = {
+        {"Add Files...",  [this]() { /* open file dialog */ }},
+        {"Add Folder...", [this]() { /* open folder dialog */ }},
+        {"", {}, true}, // separator
+        {"Save Workspace", [this]() { saveLayout(); }},
+        {"", {}, true},
+        {"Quit", [this]() { glfwSetWindowShouldClose(m_window, GLFW_TRUE); }}
+    };
+
+    Menu viewMenu;
+    viewMenu.label = "View";
+    viewMenu.entries = {
+        {"Toggle Left Sidebar",   [this]() { m_regionManager->leftRegion()->toggleCollapsed(); }},
+        {"Toggle Right Sidebar",  [this]() { m_regionManager->rightRegion()->toggleCollapsed(); }},
+        {"Toggle Bottom Panel",   [this]() { m_regionManager->bottomRegion()->toggleCollapsed(); }},
+        {"", {}, true},
+        {"Welcome Screen",        [this]() { m_regionManager->center()->focusTab("Welcome"); }}
+    };
+
+    Menu helpMenu;
+    helpMenu.label = "Help";
+    helpMenu.entries = {
+        {"About ORF", []() { LOG_INFO("OpenReferenceFolder v0.7"); }}
+    };
+
+    m_regionManager->topBar()->addMenu(std::move(fileMenu));
+    m_regionManager->topBar()->addMenu(std::move(viewMenu));
+    m_regionManager->topBar()->addMenu(std::move(helpMenu));
 
     glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int w, int h) {
         auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
@@ -116,16 +203,12 @@ void Application::run() {
 
         m_thumbs.uploadPending();
 
-        if (m_dockManager) m_dockManager->updateFloatingWindows();
-
         glClearColor(theme().windowBackground.r, theme().windowBackground.g, theme().windowBackground.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         m_renderer.begin();
-        if (m_dockManager) m_dockManager->paint(m_renderer);
+        if (m_regionManager) m_regionManager->paint(m_renderer);
         m_renderer.end();
-
-        if (m_dockManager) m_dockManager->paintFloatingWindows();
 
         glfwSwapBuffers(m_window);
     }
@@ -155,46 +238,49 @@ void Application::onFramebufferResize(int w, int h) {
     m_fbHeight = h;
     m_renderer.setViewportSize(w, h);
     glViewport(0, 0, w, h);
-    if (m_dockManager) m_dockManager->resize(w, h);
+    if (m_regionManager) m_regionManager->resize(w, h);
 }
 
 void Application::onKey(int key, int action) {
+    if (m_regionManager) m_regionManager->onKey(key, action);
+
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(m_window, GLFW_TRUE);
     }
 }
 
 void Application::onMouseMove(double x, double y) {
-    if (m_dockManager) {
-        m_dockManager->onMouseMove((float)x, (float)y);
+    if (m_regionManager) {
+        m_regionManager->onMouseMove((float)x, (float)y);
         updateCursor((float)x, (float)y);
     }
 }
 
 void Application::onMouseButton(int button, int action) {
-    if (m_dockManager) {
+    if (m_regionManager) {
         double x, y;
         glfwGetCursorPos(m_window, &x, &y);
         if (action == GLFW_PRESS)
-            m_dockManager->onMousePress((float)x, (float)y, button);
+            m_regionManager->onMousePress((float)x, (float)y, button);
         else
-            m_dockManager->onMouseRelease((float)x, (float)y, button);
+            m_regionManager->onMouseRelease((float)x, (float)y, button);
     }
 }
 
 void Application::onScroll(double yOffset) {
+    if (m_regionManager) m_regionManager->onScroll((float)yOffset);
 }
 
 void Application::markAllDirty() {
-    if (m_dockManager && m_dockManager->root()) {
-        m_dockManager->root()->markDirty();
-    }
+    // Phase 7 layout is painted unconditionally for now.
+    // In Phase 8 we'll add a more surgical dirty-flag system for regions.
 }
 
 void Application::saveLayout(const std::string& name) {
-    if (!m_dockManager) return;
+    if (!m_regionManager) return;
     
-    nlohmann::json j = m_dockManager->serialize();
+    nlohmann::json j;
+    m_regionManager->serializeLayout(j);
     std::string path = (name == "layout") ? "layout.json" : "workspaces/" + name + ".json";
     std::ofstream file(path);
     if (file.is_open()) {
@@ -204,65 +290,26 @@ void Application::saveLayout(const std::string& name) {
 }
 
 void Application::loadLayout(const std::string& name) {
+    if (!m_regionManager) return;
+
     std::string path = (name == "layout") ? "layout.json" : "workspaces/" + name + ".json";
     std::ifstream file(path);
     if (file.is_open()) {
         try {
             nlohmann::json j;
             file >> j;
-            auto root = DockNode::deserialize(j, m_font, &m_database, &m_thumbs);
-            if (root) {
-                m_dockManager->setRoot(std::move(root));
-                LOG_INFO("Layout loaded from " << path);
-                return;
-            }
+            m_regionManager->deserializeLayout(j);
+            LOG_INFO("Layout loaded from " << path);
         } catch (const std::exception& e) {
             LOG_ERROR("Failed to load layout: " << e.what());
         }
     }
-
-    if (name != "layout") return; // Don't build fallback for custom workspace if file missing
-
-    // Fallback: Build the Real Dock Layout
-    auto browser = std::make_unique<FileBrowserWidget>(m_database, m_thumbs, m_font);
-    browser->refresh();
-    browser->setViewMode(BrowserViewMode::Grid);
-
-    auto browserPanel = std::make_unique<PanelNode>("Reference Folder", std::move(browser), m_font);
-
-    auto dcWidgetPtr = std::make_unique<DisplayCenterWidget>(m_font, ThemeManager::get(), m_database);
-    DisplayCenterWidget* dcWidget = dcWidgetPtr.get();
-    
-    dcWidget->setOnSaveWorkspace([this](const std::string& name) {
-        saveLayout(name);
-    });
-    dcWidget->setOnApplyWorkspace([this](const std::string& name) {
-        loadLayout(name);
-    });
-    dcWidget->setOnDeleteWorkspace([](const std::string& name) {
-        // file deletion handled in dcWidget for now
-    });
-
-    auto dcPanel = std::make_unique<PanelNode>("Display Center", std::move(dcWidgetPtr), m_font);
-
-    auto root = std::make_unique<SplitNode>(
-        SplitAxis::Horizontal,
-        std::move(browserPanel),
-        std::move(dcPanel),
-        0.30f
-    );
-
-    m_dockManager->setRoot(std::move(root));
 }
 
 void Application::updateCursor(float x, float y) {
-    auto axis = m_dockManager->hitTestDivider(x, y);
-    if (!axis.has_value())
-        glfwSetCursor(m_window, m_cursorArrow);
-    else if (*axis == SplitAxis::Horizontal)
-        glfwSetCursor(m_window, m_cursorHSplit);
-    else
-        glfwSetCursor(m_window, m_cursorVSplit);
+    // RegionManager handles resize grips
+    // For now, reset to arrow. Grip-specific cursors will be added in Phase 8.
+    glfwSetCursor(m_window, m_cursorArrow);
 }
 
 } // namespace orf

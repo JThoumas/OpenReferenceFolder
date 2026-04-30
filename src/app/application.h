@@ -3,13 +3,15 @@
 #include <GLFW/glfw3.h>
 #include "framework/renderer/renderer2d.h"
 #include "framework/renderer/font.h"
-#include "framework/docking/dock_manager.h"
+#include "framework/regions/region_manager.h"
 #include "app/model/database.h"
 #include "app/thumbnail/thumbnail_cache.h"
 #include "framework/theme/theme_manager.h"
 #include <memory>
 
 namespace orf {
+
+class PureViewWidget;
 
 class Application {
 public:
@@ -48,7 +50,8 @@ private:
     Database       m_database;
     ThumbnailCache m_thumbs;
 
-    std::unique_ptr<DockManager> m_dockManager;
+    std::unique_ptr<RegionManager> m_regionManager;
+    PureViewWidget* m_sidebarPureView = nullptr; // owned by right region
 
     GLFWcursor* m_cursorArrow  = nullptr;
     GLFWcursor* m_cursorHSplit = nullptr;
