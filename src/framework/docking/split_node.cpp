@@ -1,5 +1,6 @@
 #include "split_node.h"
 #include "framework/theme/theme_manager.h"
+#include "framework/core/log.h"
 #include <algorithm>
 
 namespace orf {
@@ -60,9 +61,8 @@ bool SplitNode::dividerContains(float x, float y) const {
 }
 
 void SplitNode::paint(Renderer2D& renderer) {
-    // Paint children first
-    m_first ->paint(renderer);
-    m_second->paint(renderer);
+    if (m_first) m_first ->paint(renderer);
+    if (m_second) m_second->paint(renderer);
 
     // Draw divider — slightly brighter when being dragged
     Color divColor = m_dragging

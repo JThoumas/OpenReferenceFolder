@@ -3,6 +3,7 @@
 #include "framework/renderer/font.h"
 #include "framework/theme/theme_manager.h"
 #include <string>
+#include <optional>
 
 namespace orf {
 

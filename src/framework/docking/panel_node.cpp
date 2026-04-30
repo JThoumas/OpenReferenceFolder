@@ -1,5 +1,6 @@
 #include "panel_node.h"
 #include "framework/theme/theme_manager.h"
+#include "framework/core/log.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -51,7 +52,7 @@ void PanelNode::paint(Renderer2D& renderer) {
         m_bounds.width,
         m_bounds.height - TITLE_BAR_HEIGHT
     });
-    m_content->onPaint(renderer);
+    if (m_content) m_content->onPaint(renderer);
     renderer.popClip();
 }
 

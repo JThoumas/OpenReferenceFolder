@@ -76,7 +76,14 @@ bool Application::init(int width, int height, const char* title) {
     });
 
     if (!m_font.load("assets/fonts/Inter-Regular.ttf", 16)) {
-        LOG_WARN("Failed to load default font, text rendering may fail");
+        LOG_WARN("Failed to load default font, trying system fallbacks...");
+        if (!m_font.load("/Library/Fonts/Arial.ttf", 16)) {
+            if (!m_font.load("/System/Library/Fonts/Helvetica.ttc", 16)) {
+                if (!m_font.load("/Library/Fonts/Arial Unicode.ttf", 16)) {
+                    LOG_ERROR("All fallback fonts failed. Text will not render.");
+                }
+            }
+        }
     }
 
     m_cursorArrow  = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
@@ -203,7 +210,8 @@ void Application::run() {
 
         m_thumbs.uploadPending();
 
-        glClearColor(theme().windowBackground.r, theme().windowBackground.g, theme().windowBackground.b, 1.0f);
+        const Theme& t = theme();
+        glClearColor(t.windowBackground.r, t.windowBackground.g, t.windowBackground.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         m_renderer.begin();

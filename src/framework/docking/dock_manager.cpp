@@ -95,7 +95,10 @@ void DockManager::resize(int w, int h) {
 }
 
 void DockManager::paint(Renderer2D& renderer) {
-    if (m_root) m_root->paint(renderer);
+    if (m_root) {
+        // LOG_INFO("DockManager::paint: painting root");
+        m_root->paint(renderer);
+    }
 }
 
 void DockManager::onMouseMove(float x, float y) {
