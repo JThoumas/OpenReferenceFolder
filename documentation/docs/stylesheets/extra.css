@@ -1,0 +1,168 @@
+html, body {
+  overscroll-behavior: none;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #1b1b1f;
+}
+
+body, div, p, span, section {
+  font-family: var(--md-text-font-family);
+}
+
+
+.h3-style {
+  display: block;             /* Ensures it stays on its own line like a heading */
+  font-size: 1.17em;          /* Standard H3 size; adjust if your theme differs */
+  font-weight: bold;          /* Typically headings are bold */
+  margin-block-start: 1em;    /* Standard vertical spacing */
+  margin-block-end: 1em;
+}
+/* Text color to white for better contrast on dark background */
+.md-button {
+  color: white !important;
+}
+
+.md-typeset a:not(.md-icon)[href^="https"]::after {
+  content: " ↗";
+  font-size: smaller;
+  vertical-align: top;
+}
+
+.md-typeset a[href*="docs.openreferencefolder.org"]::after {
+  content: none !important;
+}
+
+.md-typeset a[href*="https://github.com/JThoumas/OpenReferenceFolder/graphs/contributors"]::after {
+  content: none !important;
+}
+
+/* Center text inside the cards */
+.text-center {
+    text-align: center;
+}
+
+/* Container to hold the cards in one row */
+.os-grid {
+  display: flex;
+  gap: 15px; /* Space between cards */
+  justify-content: center;
+  margin: 20px 0;
+  flex-wrap: nowrap; /* Forces single row on desktop */
+}
+
+/* Color Scheme Variables for OS Cards */
+:root,
+[data-md-color-scheme="default"] {
+  --os-card-bg: #ffffff;
+  --os-card-border: #e0e0e0;
+  --os-card-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  --os-header-bg: #f5f5f7;
+  --os-header-border: #e5e5e5;
+  --os-header-color: #1d1d1f;
+  --os-btn-secondary-bg: #e5e5ea;
+  --os-btn-secondary-color: #333333;
+}
+
+[data-md-color-scheme="slate"] {
+  --os-card-bg: #2E2E2E;
+  --os-card-border: #444444;
+  --os-card-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  --os-header-bg: rgba(255, 255, 255, 0.05);
+  --os-header-border: #444444;
+  --os-header-color: #ffffff;
+  --os-btn-secondary-bg: #444444;
+  --os-btn-secondary-color: #dddddd;
+}
+
+/* Individual Card Styling */
+.os-card {
+  flex: 1; /* Makes all cards equal width */
+  min-width: 0; /* Prevents overflow issues */
+  background: var(--os-card-bg);
+  border: 1px solid var(--os-card-border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  box-shadow: var(--os-card-shadow);
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Header Text (Windows, Linux, MacOS) */
+.os-header {
+  background: var(--os-header-bg);
+  padding: 10px;
+  font-weight: bold;
+  font-size: 1.1em;
+  border-bottom: 1px solid var(--os-header-border);
+  color: var(--os-header-color);
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* Logo Area */
+.os-content {
+  padding: 15px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.os-logo {
+  width: 125px;
+  height: 125px;
+  display: block;
+}
+
+/* Button Area */
+.os-actions {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Button Styling */
+.os-btn {
+  display: block;
+  padding: 8px;
+  border-radius: 4px;
+  text-decoration: none !important; /* Overrides default link underline */
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: opacity 0.2s, background-color 0.25s ease;
+}
+
+.os-btn:hover {
+  opacity: 0.8;
+}
+
+/* Blue Button */
+.os-btn.primary {
+  background-color: #3B6DB0; 
+  color: white !important;
+}
+
+/* Dark/Grey Button */
+.os-btn.secondary {
+  background-color: var(--os-btn-secondary-bg);
+  color: var(--os-btn-secondary-color) !important;
+}
+
+/* Mobile Responsiveness: Stack them if screen is too small */
+@media (max-width: 768px) {
+  .os-grid {
+    flex-wrap: wrap;
+  }
+  .os-card {
+    min-width: 100%;
+  }
+}
+
+/* Hide bottom footer credit bar (Zensical / MkDocs copyright footer) */
+.md-footer-meta {
+  display: none !important;
+}
