@@ -1,0 +1,108 @@
+# Glossary for translating the ORF docs and the app.
+#
+# Rule: use the app's own strings and the terms below. Never invent a term.
+# The app's UI strings must use the same terms as the docs.
+#
+# [keep]  terms that are never translated.
+# [terms] terms that each language translates. Empty values are not decided yet;
+#         `build_docs.py status` lists them as glossary gaps.
+
+[keep]
+terms = ["ORF", "OpenReferenceFolder", "PureView", "ZenRef", "ORF Folder"]
+
+[terms."Compact mode"]
+note = "UI name of the mode that shrinks ORF to a small window."
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."virtual folder"]
+note = "A folder that exists only inside ORF and has no path on disk."
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."real folder"]
+note = "A folder that maps to a path on disk."
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."assets folder"]
+note = "The folder where ORF keeps copies of the files you add."
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."navigation tree"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."workspace"]
+note = "A saved arrangement of panels."
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."Preferences"]
+note = "UI name of the settings window."
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."linked PureView"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."unlinked PureView"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."Backup Mode"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."Show more options"]
+note = "UI name of the context-menu entry."
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."Canvas Mode"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."Photos Mode"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."Startup Behavior"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""
+
+[terms."UI Presets"]
+ja = ""
+ko = ""
+zh = ""
+zh-Hant = ""

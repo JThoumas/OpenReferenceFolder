@@ -1,0 +1,137 @@
+[project]
+site_name = "ORF Documentation Site"
+docs_dir = "docs/en"
+site_dir = "site/en"
+site_url = "https://docs.openreferencefolder.org/en/"
+site_description = "Open-source folder desktop application built for creatives"
+repo_url = "https://github.com/JThoumas/OpenReferenceFolder"
+repo_name = "OpenReferenceFolder"
+
+extra_css = ["stylesheets/extra.css"]
+extra_javascript = ["javascripts/external-links.js"]
+
+# Site Navigation
+nav = [
+  { "Home" = "index.md" },
+  { "User Manual" = [
+    { "Getting Started" = "manual/index.md" },
+    { "Basics" = [
+      { "Concepts" = "manual/introduction/concepts.md" },
+      { "Homepage" = "manual/introduction/homepage.md" },
+      { "File Browser" = "manual/introduction/file-browser.md" },
+      { "Docking Panels" = "manual/introduction/docking-panels.md" },
+      { "Compact Mode" = "manual/introduction/compact-mode.md" },
+      { "Workspaces" = "manual/introduction/workspaces.md" }
+    ]},
+    { "Files" = [
+      { "File Operations" = "manual/introduction/file-operations.md" },
+      { "Drag and Drop" = "manual/introduction/drag-and-drop.md" },
+      { "View Filtering" = "manual/introduction/filtering.md" },
+      { "Supported Formats" = "manual/introduction/supported-files.md" }
+    ]},
+    { "Preferences" = [
+      { "Preferences" = "manual/preferences/index.md" }
+    ]},
+    { "Plugins" = [
+      { "Overview" = "manual/plugins/overview.md" },
+      { "PureView" = "manual/plugins/pureview.md" },
+      { "ZenRef" = "manual/plugins/zenref.md" },
+      { "ORF Folder" = "manual/plugins/orf-folder.md" }
+    ]},
+    { "Pen Tablets" = "manual/pen-tablets.md" },
+    { "Installation Guides" = [
+      { "Windows" = "manual/installation/windows.md" },
+      { "macOS" = "manual/installation/macos.md" },
+      { "Linux" = "manual/installation/linux.md" },
+      { "Data Locations" = "manual/installation/data-locations.md" }
+    ]}
+  ]},
+  { "Plugins" = "plugins/index.md" },
+  { "FAQ" = [
+    { "General" = "faq/index.md" },
+    { "Platforms" = "faq/platforms.md" }
+  ]},
+  { "Development" = [
+    { "Building" = "development/building.md" },
+    { "Architecture" = "development/architecture.md" },
+    { "Plugin Development" = "development/plugin-development.md" },
+    { "Development Guide" = "development/development-guide.md" },
+    { "Translating" = "development/translating.md" },
+    { "Roadmap" = "development/roadmap.md" }
+  ]}
+]
+
+# Markdown Extensions translated to TOML arrays and inline tables
+markdown_extensions = [
+  "attr_list",
+  "md_in_html",
+  "pymdownx.caret",
+  "pymdownx.mark",
+  "pymdownx.tilde",
+  "pymdownx.inlinehilite",
+  "pymdownx.snippets",
+  "pymdownx.superfences",
+  "admonition",
+  "pymdownx.details",
+  { "pymdownx.highlight" = { anchor_linenums = true } },
+  { "pymdownx.tabbed" = { alternate_style = true } },
+  { "pymdownx.emoji" = { emoji_index = "zensical.extensions.emoji.twemoji", emoji_generator = "zensical.extensions.emoji.to_svg" } },
+]
+
+
+# ----------------------------------------------------------------------------
+# Theme configuration
+# ----------------------------------------------------------------------------
+[project.theme]
+language = "en"
+logo = "assets/images/ORFIcon.png"
+favicon = "assets/images/favicon.ico"
+
+features = [
+  "navigation.instant",
+  "navigation.instant.prefetch",
+  "navigation.instant.progress",
+  "navigation.tracking",
+  "navigation.tabs",
+  "navigation.tabs.sticky",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.footer",
+  "navigation.path",
+  "search.suggest",
+  "search.highlight"
+]
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+# ----------------------------------------------------------------------------
+# Palette Settings (Light/Dark Mode Toggles)
+# ----------------------------------------------------------------------------
+# Palette toggle for automatic mode
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+# Palette toggle for light mode
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+# Palette toggle for dark mode
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+# ----------------------------------------------------------------------------
+# Extra configuration
+# The language switcher (extra.alternate) is added by scripts/build_docs.py
+# when at least one language in i18n/ is enabled.
+# ----------------------------------------------------------------------------
+[project.extra]
+generator = false

@@ -1,0 +1,53 @@
+# Translation settings for ja. See docs/en/development/translating.md.
+# Set enabled = true when the language is ready to publish.
+enabled = false
+name = "日本語"
+theme_language = "ja"
+
+# Empty values fall back to English.
+site_name = ""
+site_description = ""
+
+# Banner texts (admonition body, Markdown). Drafted when the language is enabled.
+banner_untranslated = ""
+banner_outdated = ""
+
+# Nav titles: English title = translated title. A missing or empty title falls back to English.
+[nav]
+"Home" = ""
+"User Manual" = ""
+"Getting Started" = ""
+"Basics" = ""
+"Concepts" = ""
+"Homepage" = ""
+"File Browser" = ""
+"Docking Panels" = ""
+"Compact Mode" = ""
+"Workspaces" = ""
+"Files" = ""
+"File Operations" = ""
+"Drag and Drop" = ""
+"View Filtering" = ""
+"Supported Formats" = ""
+"Preferences" = ""
+"Plugins" = ""
+"Overview" = ""
+"PureView" = ""
+"ZenRef" = ""
+"ORF Folder" = ""
+"Pen Tablets" = ""
+"Installation Guides" = ""
+"Windows" = ""
+"macOS" = ""
+"Linux" = ""
+"Data Locations" = ""
+"FAQ" = ""
+"General" = ""
+"Platforms" = ""
+"Development" = ""
+"Building" = ""
+"Architecture" = ""
+"Plugin Development" = ""
+"Development Guide" = ""
+"Translating" = ""
+"Roadmap" = ""
